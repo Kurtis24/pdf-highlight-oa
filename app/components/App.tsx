@@ -1,4 +1,4 @@
-// app/components/App.tsx
+// pdf-highlight-oa/app/components/App.tsx
 "use client";
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import PdfUploader from "./PdfUploader";

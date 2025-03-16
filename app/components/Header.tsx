@@ -1,4 +1,4 @@
-// app/components/Header.tsx
+// pdf-highlight-oa/app/components/Header.tsx
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
