@@ -6,6 +6,7 @@ import KeywordSearch from "./KeywordSearch";
 import PdfViewer from "./PdfViewer";
 import { Header } from "./Header";
 import Spinner from "./Spinner";
+import ChatWithPDF from "./ChatWithPDF";
 import { convertPdfToImages, searchPdf } from "../utils/pdfUtils";
 import type { IHighlight } from "react-pdf-highlighter";
 import HighlightUploader from "./HighlightUploader";
@@ -266,6 +267,7 @@ export default function App() {
                 />
               )
             }
+            
             {pdfUrl && (
               <KeywordSearch
                 searchTerm={searchTerm}
@@ -293,8 +295,10 @@ export default function App() {
               scrollToHighlightFromHash={scrollToHighlightFromHash}
             />
           )}
+          
         </div>
       </div>
+      <ChatWithPDF />
     </div>
   );
 }
