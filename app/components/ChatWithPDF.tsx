@@ -1,3 +1,4 @@
+// components/ChatWithWtfPDF.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -7,7 +8,11 @@ interface ChatMessage {
   text: string;
 }
 
-const ChatWithWtfPDF: React.FC = () => {
+interface ChatWithWtfPDFProps {
+  extractedMessage?: string;
+}
+
+const ChatWithWtfPDF: React.FC<ChatWithWtfPDFProps> = ({ extractedMessage }) => {
   const [query, setQuery] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -16,15 +21,28 @@ const ChatWithWtfPDF: React.FC = () => {
     if (!query.trim()) return;
     setLoading(true);
 
-    // Append the user's message to the chat history
     const userMessage: ChatMessage = { role: "user", text: query };
     setChatHistory((prev) => [...prev, userMessage]);
 
     try {
+      const payload = {
+        model: "llama3-70b-8192",
+        messages: [
+          {
+            role: "system",
+            content: extractedMessage
+              ? extractedMessage
+              : "You are a helpful assistant.",
+          },
+          { role: "user", content: query },
+        ],
+        temperature: 0.7,
+      };
+
       const res = await fetch("/api/groq", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: query }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -32,7 +50,6 @@ const ChatWithWtfPDF: React.FC = () => {
       }
       const data = await res.json();
 
-      // Append the bot's reply to the chat history
       const botMessage: ChatMessage = {
         role: "assistant",
         text: data.response || "No response found",
@@ -46,38 +63,39 @@ const ChatWithWtfPDF: React.FC = () => {
       };
       setChatHistory((prev) => [...prev, errorMessage]);
     }
+
     setQuery("");
     setLoading(false);
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "16px" }}>
-      <h2>Chat with Groq Bot</h2>
-      <div
-        style={{
-          border: "1px solid #ccc",
-          padding: "8px",
-          height: "300px",
-          overflowY: "auto",
-          marginBottom: "16px",
-        }}
-      >
+    <div className="bg-white shadow-lg rounded-lg max-w-xl mx-auto flex flex-col h-[80vh] p-4">
+      <h2 className="text-xl font-bold mb-4 text-center">Chat with Groq Bot</h2>
+
+      {/* Chat history container with scroll */}
+      <div className="flex-1 border border-gray-300 p-2 overflow-y-auto mb-4 rounded">
         {chatHistory.map((msg, index) => (
-          <div key={index} style={{ marginBottom: "8px" }}>
+          <div key={index} className="mb-2">
             <strong>{msg.role === "user" ? "You:" : "Bot:"}</strong> {msg.text}
           </div>
         ))}
       </div>
-      <div style={{ display: "flex" }}>
+
+      {/* Input row */}
+      <div className="flex">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
           placeholder="Type your message..."
-          style={{ flex: 1, marginRight: "8px", padding: "8px" }}
+          className="flex-1 mr-2 p-2 border border-gray-300 rounded"
         />
-        <button onClick={handleSend} disabled={loading} style={{ padding: "8px 16px" }}>
+        <button
+          onClick={handleSend}
+          disabled={loading}
+          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded disabled:opacity-50"
+        >
           {loading ? "Sending..." : "Send"}
         </button>
       </div>
